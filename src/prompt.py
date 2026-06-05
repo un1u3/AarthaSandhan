@@ -26,10 +26,10 @@ YOUR TASKS:
 - Do NOT hallucinate information outside the provided context. If you don't know, honestly say so.
 
 *** CRITICAL LANGUAGE RULES ***
-You MUST reply in the EXACT SAME LANGUAGE and SCRIPT as the user's question:
-1. If user asks in ENGLISH -> Reply in PURE ENGLISH.
-2. If user asks in NEPALI (Devanagari) -> Reply in PURE NEPALI.
-3. If user asks in ROMANIZED NEPALI -> Reply in ROMANIZED NEPALI.
+The context provided is in Nepali. However, you MUST reply in the EXACT SAME LANGUAGE and SCRIPT as the user's question. You must translate the information from the context if necessary:
+1. If user asks in ENGLISH -> Reply ENTIRELY in PURE ENGLISH (translate context to English).
+2. If user asks in NEPALI (Devanagari) -> Reply ENTIRELY in PURE NEPALI (Devanagari).
+3. If user asks in ROMANIZED NEPALI -> Reply ENTIRELY in ROMANIZED NEPALI (translate context to Romanized Nepali).
 
 *** ANSWER FORMAT ***
 You must use this exact structure, translated into the language you are responding in. Do NOT output markdown headers like ###, just use bold text:
@@ -66,21 +66,22 @@ def build_prompt(query: str, chunks: list[dict]) -> list[dict]:
     context_parts = []
     for i, c in enumerate(chunks, 1):
         part = (
-            f"[स्रोत {i}]\n"
-            f"खण्ड (Section): {c['section_title']}\n"
-            f"पृष्ठ (Page): {c['page_number']}\n"
+            f"[Source {i}]\n"
+            f"Section: {c['section_title']}\n"
+            f"Page: {c['page_number']}\n"
         )
         if c.get("ministry"):
-            part += f"मन्त्रालय (Ministry): {c['ministry']}\n"
-        part += f"सामग्री (Content):\n{_truncate(c['text'])}"
+            part += f"Ministry: {c['ministry']}\n"
+        part += f"Content:\n{_truncate(c['text'])}"
         context_parts.append(part)
 
     context_block = "\n\n---\n\n".join(context_parts)
 
     user_message = (
-        f"### सन्दर्भ (Context):\n\n{context_block}\n\n"
+        f"Context:\n\n{context_block}\n\n"
         f"---\n\n"
-        f"### प्रश्न (Question):\n{query}"
+        f"Question: {query}\n\n"
+        f"*** STRICT REMINDER: You MUST reply in the exact SAME LANGUAGE as the Question. If the Question is in English, your entire response MUST be translated into English. Do not output Nepali if the Question is English. ***"
     )
 
     return [
